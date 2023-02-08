@@ -18,5 +18,5 @@ configViewEngine(app);
 initWebRoutes(app);
 
 app.listen(port, () => {
-    console.log('Tien iu Xan');
+    console.log('Tien iu Xuan');
 })
