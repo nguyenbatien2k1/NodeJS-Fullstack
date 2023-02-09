@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import configViewEngine from './config/viewEngine';
 import initWebRoutes from './route/web';
 
+import connectDB from './config/connectDB'
+
 require('dotenv').config() // sử dụng để cấu hình file môi trường
 
 let app = express();
@@ -16,6 +18,9 @@ app.use(express.json());
 configViewEngine(app);
 
 initWebRoutes(app);
+
+// Connect Database
+connectDB();
 
 app.listen(port, () => {
     console.log('Tien iu Xuan');
