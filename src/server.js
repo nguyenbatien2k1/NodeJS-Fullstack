@@ -11,7 +11,7 @@ let app = express();
 
 let port = process.env.PORT || 1411;
 
-//config app
+//
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
