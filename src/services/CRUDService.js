@@ -76,10 +76,11 @@ let updateUser = async (data) => {
         try {
             let user = await db.User.findOne({
                 where: {id: data.id}
-            })
+            });
             if(user) {
+                let hashPassword = await hashUserPassword(user.password);
                 user.email = data.email;
-                user.password = data.password;
+                user.password = hashPassword;
                 user.firstName = data.firstName;
                 user.lastName = data.lastName;
                 user.address = data.address;
@@ -87,7 +88,8 @@ let updateUser = async (data) => {
                 user.gender = data.gender;
                 user.roleId = data.roleId;
 
-                await user.save();
+                await db.User.update(user,  {where: {id: data.id}});
+                // await user.save();
 
                 resolve();
             }

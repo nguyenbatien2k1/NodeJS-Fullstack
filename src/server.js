@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import configViewEngine from './config/viewEngine';
 import initWebRoutes from './route/web';
 
+import cors from "cors";
+
 import connectDB from './config/connectDB'
 
 require('dotenv').config() // sử dụng để cấu hình file môi trường
@@ -10,6 +12,9 @@ require('dotenv').config() // sử dụng để cấu hình file môi trường
 let app = express();
 
 let port = process.env.PORT || 1411;
+
+//
+app.use(cors({ credentials: true, origin: true }));
 
 //
 app.use(express.urlencoded({ extended: false }));
