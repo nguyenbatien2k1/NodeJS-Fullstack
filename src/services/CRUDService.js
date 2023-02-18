@@ -20,7 +20,10 @@ let createNewUser = async (data) => {
                 roleId: data.roleId,
                 positionId: '',
             })
-            resolve('create new user success!')
+            resolve({
+                errCode: 0,
+                errMessage: 'OK'
+            })
 
         } catch (error) {
             reject(error);
