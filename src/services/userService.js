@@ -145,32 +145,35 @@ let editUser = (data) => {
                     errMessage: `The user isn't exist!`
                 })
             }
-            let user = await db.User.findOne({
-                where: {id: data.id}
-            });
-            if(user) {
-                let hashPassword = await hashUserPassword(user.password);
-                user.email = data.email;
-                user.password = hashPassword;
-                user.firstName = data.firstName;
-                user.lastName = data.lastName;
-                user.address = data.address;
-                user.phonenumber = data.phonenumber;
-                user.gender = data.gender;
-                user.roleId = data.roleId;
-
-                await db.User.update(user, {where: {id: data.id}});
-
-                resolve({
-                    errCode: 0,
-                    errMessage: `UPDATE OK!`
-                })
-            }
             else {
-                resolve({
-                    errCode: 2,
-                    errMessage: `The user isn't exist!`
-                })
+                let user = await db.User.findOne({
+                    where: {id: data.id}
+                });
+                if(user) {
+                    let hashPassword = await hashUserPassword(data.password);
+
+                    user.email = data.email;
+                    user.password = hashPassword;
+                    user.firstName = data.firstName;
+                    user.lastName = data.lastName;
+                    user.address = data.address;
+                    user.phonenumber = data.phonenumber;
+                    user.gender = data.gender;
+                    user.roleId = data.roleId;
+    
+                    await db.User.update(user, {where: {id: data.id}});
+    
+                    resolve({
+                        errCode: 0,
+                        errMessage: `UPDATE OK!`
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: `The user isn't exist!`
+                    })
+                }
             }
 
         } catch (error) {
@@ -204,10 +207,38 @@ let deleteUser = (id) => {
     })
 }
 
+let getAllCodeService = (type) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if(!type) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters!'
+                })
+            }
+            else {
+                let res = {};
+                let allcode = await db.Allcode.findAll({
+                    where: {type}
+                });
+    
+                res.errCode = 0;
+                res.data = allcode;
+    
+                resolve(res);
+            }
+            
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 export default {
     handleUserLogin,
     getAllUsers,
     createNewUser,
     editUser,
     deleteUser,
+    getAllCodeService,
 }

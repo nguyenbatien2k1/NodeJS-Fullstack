@@ -31,7 +31,7 @@ let createNewUser = async (data) => {
     })
 }
 
-let hashUserPassword = (password) => {
+let hashUserPassword = async (password) => {
     return new Promise( async (resolve, reject) => {
         try {
             let hashPassword = await bcrypt.hashSync(password, salt);
@@ -81,7 +81,8 @@ let updateUser = async (data) => {
                 where: {id: data.id}
             });
             if(user) {
-                let hashPassword = await hashUserPassword(user.password);
+                let hashPassword = await hashUserPassword(data.password);
+
                 user.email = data.email;
                 user.password = hashPassword;
                 user.firstName = data.firstName;
@@ -90,6 +91,7 @@ let updateUser = async (data) => {
                 user.phonenumber = data.phonenumber;
                 user.gender = data.gender;
                 user.roleId = data.roleId;
+
 
                 await db.User.update(user,  {where: {id: data.id}});
                 // await user.save();
