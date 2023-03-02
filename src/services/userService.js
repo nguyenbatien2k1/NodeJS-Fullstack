@@ -121,7 +121,7 @@ let createNewUser = (data) => {
                     address: data.address,
                     phonenumber: data.phonenumber,
                     gender: data.gender,
-                    image: '',
+                    image: data.image,
                     roleId: data.roleId,
                     positionId: data.positionId,
                 })
@@ -160,6 +160,10 @@ let editUser = (data) => {
                     user.phonenumber = data.phonenumber;
                     user.gender = data.gender;
                     user.roleId = data.roleId;
+                    user.positionId = data.positionId;
+                    if(data.image) {
+                        user.image = data.image;
+                    }
     
                     await db.User.update(user, {where: {id: data.id}});
     

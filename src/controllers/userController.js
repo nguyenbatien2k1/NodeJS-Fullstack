@@ -35,7 +35,7 @@ let handleGetAllUsers = async (req, res) => {
     
     return res.status(200).json({
         errCode: 0,
-        errMessage: 'CREATE OK',
+        errMessage: 'GET ALL USERS OK',
         users,
     })
 }
