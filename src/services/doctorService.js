@@ -94,8 +94,44 @@ let createInfoDoctor = (data) => {
     })
 }
 
+let getDetailDoctor = (doctorId) => {
+    return new Promise (async (resolve, reject) => {
+        try {
+            if(!doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing parameter...'
+                })
+            }
+            else {
+                let data = await db.User.findOne({
+                    where: {
+                        id: doctorId
+                    },
+                    attributes: {
+                        exclude: ['password', 'image']
+                    },
+                    include: [
+                        {model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown']},
+                        {model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi']},
+                    ],
+                    raw: true,
+                    nest: true,
+                })
+                resolve({
+                    errCode: 0,
+                    data: data
+                })
+            }
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 export default {
     getOutStandingDoctor,
     getAllDoctors,
-    createInfoDoctor
+    createInfoDoctor,
+    getDetailDoctor
 };
