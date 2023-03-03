@@ -32,6 +32,70 @@ let getOutStandingDoctor = (limit) => {
     })
 }
 
+let getAllDoctors = () => {
+    return new Promise( async (resolve, reject) => {
+        try {
+            let doctors = await db.User.findAll({
+                where: {roleId: 'R2'},
+                order: [
+                    [
+                        "createdAt", "DESC"
+                    ]
+                ],
+                attributes: {
+                    exclude: ['password', 'image']
+                },
+            });
+            if(doctors) {
+                resolve({
+                    errCode: 0,
+                    data: doctors
+                });
+            }
+            else {
+                resolve({
+                    errorCode: -1,
+                    errMessage: 'Error from server...'
+                });
+            }
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+let createInfoDoctor = (data) => {
+    return new Promise( async (resolve, reject) => {
+        try {
+            if(!data.doctorId || !data.contentHTML || !data.contentMarkdown) {
+                resolve({
+                    errCode: 1,
+                    errMessage: "Missing parameter..."
+                })
+            }
+            else {
+                await db.Markdown.create({
+                    contentHTML: data.contentHTML,
+                    contentMarkdown: data.contentMarkdown,
+                    description: data.description,
+                    doctorId: data.doctorId,
+                    specialtyId: data.specialtyId,
+                    clinicId: data.clinicId
+                })
+
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Create doctor info success!'
+                })
+            }
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 export default {
-    getOutStandingDoctor
+    getOutStandingDoctor,
+    getAllDoctors,
+    createInfoDoctor
 };
