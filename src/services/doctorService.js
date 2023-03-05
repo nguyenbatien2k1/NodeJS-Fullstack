@@ -1,4 +1,9 @@
 import db from "../models";
+require('dotenv').config();
+import _ from 'lodash';
+
+const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
+
 
 let getOutStandingDoctor = (limit) => {
     return new Promise(async (resolve, reject) => {
@@ -175,9 +180,62 @@ let getDetailDoctor = (doctorId) => {
     })
 }
 
+let bulkCreateSchedule = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if(!data.arrSchedule || !data.date || !data.doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing parameter...'
+                })
+            }
+            else {
+                let schedule = data.arrSchedule;
+                if(schedule && schedule.length > 0) {
+                    schedule = schedule.map(item => {
+                        item.maxNumber = MAX_NUMBER_SCHEDULE;
+                        return item;
+                    })
+                }
+
+                let user = await db.Schedule.findAll({
+                    where: {
+                        doctorId: data.doctorId,
+                        date: data.date
+                    },
+                    attributes: [
+                        'timeType', 'date', 'doctorId', 'maxNumber'
+                    ]
+                })
+
+                // await db.Schedule.bulkCreate(schedule);
+
+
+
+                let toCreate = _.differenceWith(schedule, user, (a,b) => {
+                    return a.timeType === b.timeType && a.date === b.date;
+                });
+
+                // so sánh mảng khác nhau mới cho tạo schedule
+                if(toCreate && toCreate.length > 0) {
+                    await db.Schedule.bulkCreate(toCreate);
+                }
+
+                resolve({
+                    errCode: 0,
+                    errMessage: 'OK'
+                })
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 export default {
     getOutStandingDoctor,
     getAllDoctors,
     createInfoDoctor,
-    getDetailDoctor
+    getDetailDoctor,
+    bulkCreateSchedule
 };
