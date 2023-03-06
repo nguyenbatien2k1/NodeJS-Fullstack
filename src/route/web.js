@@ -44,6 +44,8 @@ let initWebRoutes = (app) => {
 
     router.get('/api/get-schedule-doctor-by-date', doctorController.getScheduleDoctorByDate);
 
+    router.get('/api/get-medical-address-doctor-by-id', doctorController.getMedicalAddressDoctorById);
+
     return app.use('/', router);
 }
 
