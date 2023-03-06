@@ -69,45 +69,40 @@ let getAllDoctors = () => {
     })
 }
 
+function checkData(data) {
+    for (let i = 0; i < Object.keys(data).length; i++) {
+        if(Object.keys(data)[i] === 'note') continue;
+        if(!Object.values(data)[i]) return false;
+    }
+    return true;
+}
+
 let createInfoDoctor = (data) => {
     return new Promise( async (resolve, reject) => {
         try {
-            if(!data.doctorId || !data.contentHTML || !data.contentMarkdown || !data.action) {
+            if(!checkData(data)) {
                 resolve({
-                    errCode: 1,
-                    errMessage: "Missing parameter..."
+                     errCode: 1,
+                     errMessage: "Missing parameter..."
                 })
             }
             else {
+                let doctor = await db.Markdown.findOne({
+                    where: {doctorId: data.doctorId}
+                })
                 if(data.action === 'CREATE') {
-                    let user = await db.Markdown.findOne({
-                        where: {doctorId: data.doctorId}
-                    })
-                    if(!user) {
+                    if(!doctor) {
                         await db.Markdown.create({
                             contentHTML: data.contentHTML,
                             contentMarkdown: data.contentMarkdown,
                             description: data.description,
                             doctorId: data.doctorId
                         })
-        
-                        resolve({
-                            errCode: 0,
-                            errMessage: 'Create doctor info success!'
-                        })
-                    }
-                    else {
-                        resolve({
-                            errCode: -1,
-                            errMessage: 'Create doctor info failed!'
-                        })
+                        
                     }
                 }
-                else {
-                    let user = await db.Markdown.findOne({
-                        where: {doctorId: data.doctorId}
-                    })
-                    if(user) {
+                else if(data.action === 'EDIT') {
+                    if(doctor) {
                         await db.Markdown.update(
                         {
                             contentHTML: data.contentHTML,
@@ -118,17 +113,42 @@ let createInfoDoctor = (data) => {
                         {
                             where: {doctorId: data.doctorId}
                         })
-
-                        resolve({
-                            errCode: 0,
-                            errMessage: 'Update doctor info success!'
-                        })
                     }
-                    else resolve({
-                        errCode: 1,
-                        errMessage: `User isn't exist in the system...`
+                }
+
+                let doctorInfo = await db.Doctor_Info.findOne({
+                    where: {doctorId: data.doctorId}
+                })
+                if(doctorInfo) {
+                    await db.Doctor_Info.update(
+                        {
+                            priceId: data.selectedPrice,
+                            paymentId: data.selectedPayment,
+                            provinceId: data.selectedProvince,
+                            doctorId: data.doctorId,
+                            nameClinic: data.nameClinic,
+                            addressClinic: data.addressClinic,
+                            note: data.note
+                        }, 
+                        {
+                            where: {doctorId: data.doctorId}
+                        })
+                }
+                else {
+                    await db.Doctor_Info.create({
+                        priceId: data.selectedPrice,
+                        paymentId: data.selectedPayment,
+                        provinceId: data.selectedProvince,
+                        doctorId: data.doctorId,
+                        nameClinic: data.nameClinic,
+                        addressClinic: data.addressClinic,
+                        note: data.note
                     })
                 }
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Save Info Success!'
+                })
             }
         } catch (error) {
             reject(error);
@@ -198,7 +218,7 @@ let bulkCreateSchedule = (data) => {
                     })
                 }
 
-                let user = await db.Schedule.findAll({
+                let doctor = await db.Schedule.findAll({
                     where: {
                         doctorId: data.doctorId,
                         date: data.date
@@ -208,7 +228,7 @@ let bulkCreateSchedule = (data) => {
                     ]
                 })
 
-                let toCreate = _.differenceWith(schedule, user, (a,b) => {
+                let toCreate = _.differenceWith(schedule, doctor, (a,b) => {
                     return a.timeType === b.timeType && a.date === b.date;
                 });
 
