@@ -322,6 +322,54 @@ let getMedicalAddressDoctorById = (doctorId) => {
     })
 }
 
+let getProfileDoctorById = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if(!doctorId) {
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Missing parameter...'
+                })
+            }
+            else {
+                let data = await db.User.findOne({
+                    where: {id: doctorId},
+                    attributes: {
+                        exclude: ['password']
+                    },
+                    include: [
+                        {model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi']},
+                        {model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown']},
+                        {
+                            model: db.Doctor_Info,
+                            include: [
+                                {model: db.Allcode, as: 'priceData', attributes: ['valueEn', 'valueVi']},
+                                {model: db.Allcode, as: 'paymentData', attributes: ['valueEn', 'valueVi']},
+                                {model: db.Allcode, as: 'provinceData', attributes: ['valueEn', 'valueVi']}
+                            ]
+                        }
+                    ],
+                    raw: false,
+                    nest: true,
+                })
+
+                if(data && data.image) {
+                    data.image = new Buffer(data.image, 'base64').toString('binary');
+                }
+
+                if(!data) data = {};
+
+                resolve({
+                    errCode: 0,
+                    data: data
+                })
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 export default {
     getOutStandingDoctor,
     getAllDoctors,
@@ -329,5 +377,6 @@ export default {
     getDetailDoctor,
     bulkCreateSchedule,
     getScheduleDoctorByDate,
-    getMedicalAddressDoctorById
+    getMedicalAddressDoctorById,
+    getProfileDoctorById
 };
