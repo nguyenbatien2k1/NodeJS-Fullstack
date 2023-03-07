@@ -1,7 +1,8 @@
 import db from "../models";
+import emailService from "./emailService";
 
 function checkData(data) {
-    if(Object.keys(data).length !== 5) return false;
+    if(!Object.keys(data).length) return false;
     else {
         for (let i = 0; i < Object.keys(data).length; i++) {
             if(Object.keys(data)[i] === 'note') continue;
@@ -21,6 +22,11 @@ let postBookAppointment = (data) => {
                 })
             }
             else {
+
+                await emailService.sendSimpleEmail({
+                    receiverEmail: data.email
+                });
+
                 let user = await db.User.findOrCreate({
                     where: {email: data.email},
                     defaults: {
@@ -30,7 +36,8 @@ let postBookAppointment = (data) => {
                 })
                 if(user && user[0]) {
                     let checkUser = await db.Booking.findOne({
-                        where: {patientId: user[0].id}
+                        // where: {patientId: user[0].id}
+                        where: {doctorId: data.doctorId, date: data.date, timeType: data.timeType}
                     })
                     if(checkUser) {
                         await db.Booking.update({
