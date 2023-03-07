@@ -70,6 +70,7 @@ let getAllDoctors = () => {
 }
 
 function checkData(data) {
+    if(Object.keys(data).length === 0) return false;
     for (let i = 0; i < Object.keys(data).length; i++) {
         if(Object.keys(data)[i] === 'note') continue;
         if(!Object.values(data)[i]) return false;
