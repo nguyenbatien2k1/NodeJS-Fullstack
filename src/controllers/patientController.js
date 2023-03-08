@@ -15,7 +15,7 @@ let postBookAppointment = async (req, res) => {
 
 let postVerifyBookAppointment = async (req, res) => {
     try {
-        let data = await patientService.postVerifyBookAppointment(req.query.doctorId, req.query.token);
+        let data = await patientService.postVerifyBookAppointment(req.query.token, req.query.doctorId);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error);

@@ -17,7 +17,7 @@ function checkData(data) {
 
 
 let buildUrlEmail = (doctorId, token) => {
-  let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`
+  let result = `${process.env.URL_REACT}/verify-book-appointment?token=${token}&doctorId=${doctorId}`
   return result;
 }
 
@@ -113,7 +113,7 @@ let postBookAppointment = (data) => {
     })
 }
 
-let postVerifyBookAppointment = (doctorId, token) => {
+let postVerifyBookAppointment = (token, doctorId) => {
     return new Promise(async (resolve, reject) => {
         try {
             if(!doctorId || !token) {
@@ -125,8 +125,8 @@ let postVerifyBookAppointment = (doctorId, token) => {
             else {
                 let appointment = await db.Booking.findOne({
                     where: {
-                        doctorId: doctorId,
                         token: token,
+                        doctorId: doctorId,
                         statusId: 'S1'
                     },
                     raw: false

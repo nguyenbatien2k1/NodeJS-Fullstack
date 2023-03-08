@@ -12,19 +12,24 @@ module.exports = {
       name: {
         type: Sequelize.STRING
       },
-      description: {
+      image: {
+        type: Sequelize.BLOB('long')
+      },
+      descriptionMarkdown: {
         type: Sequelize.TEXT
       },
-      image: {
-        type: Sequelize.STRING
+      descriptionHTML: {
+        type: Sequelize.TEXT
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       }
     });
   },
