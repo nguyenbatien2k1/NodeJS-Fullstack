@@ -1,6 +1,8 @@
 import db from "../models";
 import emailService from "./emailService";
 const { Op } = require("sequelize");
+import { v4 as uuidv4 } from 'uuid';
+
 
 function checkData(data) {
     if(!Object.keys(data).length) return false;
@@ -13,6 +15,13 @@ function checkData(data) {
     return true;
 }
 
+
+let buildUrlEmail = (doctorId, token) => {
+  let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`
+  return result;
+}
+
+
 let postBookAppointment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -23,6 +32,9 @@ let postBookAppointment = (data) => {
                 })
             }
             else {
+
+                let token = uuidv4();
+
                 await emailService.sendSimpleEmail({
                     fullname: data.fullname,
                     receiverEmail: data.email,
@@ -34,7 +46,7 @@ let postBookAppointment = (data) => {
                     price: data.price,
                     doctorName: data.doctorName,
                     language: data.language,
-                    redirectLink: 'https://www.google.com/',
+                    redirectLink: buildUrlEmail(data.doctorId, token)
                 });
 
 
@@ -65,7 +77,8 @@ let postBookAppointment = (data) => {
                             phonenumber: data.phonenumber,
                             timeVi: data.timeVi,
                             timeEn: data.timeEn,
-                            timeType: data.timeType
+                            timeType: data.timeType,
+                            token: token
                         }, {where: {patientId: user[0].id}});
 
                         resolve({
@@ -82,7 +95,8 @@ let postBookAppointment = (data) => {
                             phonenumber: data.phonenumber,
                             timeVi: data.timeVi,
                             timeEn: data.timeEn,
-                            timeType: data.timeType
+                            timeType: data.timeType,
+                            token: token
                         })
 
                         resolve({
@@ -99,6 +113,47 @@ let postBookAppointment = (data) => {
     })
 }
 
+let postVerifyBookAppointment = (doctorId, token) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if(!doctorId || !token) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Mising parameter...'
+                })
+            }
+            else {
+                let appointment = await db.Booking.findOne({
+                    where: {
+                        doctorId: doctorId,
+                        token: token,
+                        statusId: 'S1'
+                    },
+                    raw: false
+                })
+                if(appointment) {
+                    appointment.statusId = 'S2';
+                    await appointment.save();
+
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Update Appointment Success...'
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Appointment does not exist or has been activated...'
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 export default {
     postBookAppointment,
+    postVerifyBookAppointment
 }
