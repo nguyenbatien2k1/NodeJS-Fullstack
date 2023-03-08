@@ -18,12 +18,46 @@ let sendSimpleEmail = async (dataSend) => {
     
       // send mail with defined transport object
       let info = await transporter.sendMail({
-        from: '"Tien._.Basic 👻" <nguyenbatien2k1@gmail.com>', // sender address
+        from: '"Tien._.Basic 👻" <19020456@vnu.edu.vn>', // sender address
         to: dataSend.receiverEmail, // list of receivers
-        subject: "Thông tin đặt lịch khám bệnh", // Subject line
-        text: "Hello world?", // plain text body
-        html: "<b>Hello world?</b>", // html body
+        subject: dataSend.language === 'vi' ? "Thông tin đặt lịch khám bệnh" : "Information to book a medical appointment", // Subject line
+        // text: "Hello world?", // plain text body
+        html: bodyMail(dataSend), // html body
       });
+}
+
+let bodyMail = (dataSend) => {
+  let result = '';
+  if(dataSend.language === 'vi') {
+    result = `<h3>Xin chào, ${dataSend.fullname} ! </h3>
+    <p>Bạn nhận được thông báo này vì đã đặt lịch khám bệnh online của Pharmacity</p>
+    <p>Thông tin đặt lịch khám bệnh: </p>
+	  <div>Họ và tên: ${dataSend.fullname}</div>
+    <div>Số điện thoại: ${dataSend.phonenumber}</div>
+    <div>Địa chỉ: ${dataSend.address}</div>
+    <div>Bác sĩ khám bệnh: ${dataSend.doctorName}</div>
+    <div>Ngày khám: ${dataSend.timeVi}</div>
+    <div>Lý do khám: ${dataSend.reason}</div>
+    <div>Giá khám: ${dataSend.price}</div>
+    <div>Nếu thông tin trên là đúng sự thật, vui lòng click vào đường link bên dưới để xác thực.</div>
+    <a href=${dataSend.redirectLink} target="_blank">Bấm vào đây để xác thực</a>
+    <div>Xin chân thành cảm ơn!<div>
+    `
+  }
+  else if(dataSend.language === 'en') {
+    result = `<h3>Hello, {dataSend.fullname} ! </h3>
+     <p>You received this message because you booked an online appointment with Tien Basic</p>
+     <p>Medical appointment booking information: </p>
+    <div>First and last name: ${dataSend.fullname}</div>
+    
+     <div>Doctor: ${dataSend.doctorName}</div>
+     <div>Date of visit: ${dataSend.timeEn}</div>
+     <div>If the above information is true, please click on the link below to verify.</div>
+     <a href=${dataSend.redirectLink} target="_blank">Click here!</a>
+      <div>Thank you very much!<div>
+     `
+  }
+  return result;
 }
 
 export default {

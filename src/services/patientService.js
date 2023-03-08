@@ -1,5 +1,6 @@
 import db from "../models";
 import emailService from "./emailService";
+const { Op } = require("sequelize");
 
 function checkData(data) {
     if(!Object.keys(data).length) return false;
@@ -22,29 +23,48 @@ let postBookAppointment = (data) => {
                 })
             }
             else {
-
                 await emailService.sendSimpleEmail({
-                    receiverEmail: data.email
+                    fullname: data.fullname,
+                    receiverEmail: data.email,
+                    phonenumber: data.phonenumber,
+                    address: data.address,
+                    timeVi: data.timeVi,
+                    timeEn: data.timeEn,
+                    reason: data.reason,
+                    price: data.price,
+                    doctorName: data.doctorName,
+                    language: data.language,
+                    redirectLink: 'https://www.google.com/',
                 });
+
 
                 let user = await db.User.findOrCreate({
                     where: {email: data.email},
                     defaults: {
                         email: data.email,
-                        roleId: 'R3'
+                        roleId: 'R3',
+                        gender: data.selectedGender,
+                        address: data.address,
                     }
                 })
+
                 if(user && user[0]) {
                     let checkUser = await db.Booking.findOne({
-                        // where: {patientId: user[0].id}
-                        where: {doctorId: data.doctorId, date: data.date, timeType: data.timeType}
+                        where: {doctorId: data.doctorId, timeType: data.timeType, 
+                            [Op.or]: [
+                                { timeVi: data.timeVi },
+                                { timeEn: data.timeEn }
+                          ]}
                     })
                     if(checkUser) {
                         await db.Booking.update({
                             doctorId: data.doctorId,
                             statusId: 'S1',
                             patientId: user[0].id,
-                            date: data.date,
+                            fullname: data.fullname,
+                            phonenumber: data.phonenumber,
+                            timeVi: data.timeVi,
+                            timeEn: data.timeEn,
                             timeType: data.timeType
                         }, {where: {patientId: user[0].id}});
 
@@ -58,7 +78,10 @@ let postBookAppointment = (data) => {
                             doctorId: data.doctorId,
                             statusId: 'S1',
                             patientId: user[0].id,
-                            date: data.date,
+                            fullname: data.fullname,
+                            phonenumber: data.phonenumber,
+                            timeVi: data.timeVi,
+                            timeEn: data.timeEn,
                             timeType: data.timeType
                         })
 

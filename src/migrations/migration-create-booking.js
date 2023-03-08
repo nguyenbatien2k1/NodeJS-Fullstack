@@ -18,7 +18,16 @@ module.exports = {
       patientId: {
         type: Sequelize.INTEGER
       },
-      date: {
+      fullname: {
+        type: Sequelize.STRING
+      },
+      phonenumber: {
+        type: Sequelize.STRING
+      },
+      timeVi: {
+        type: Sequelize.STRING
+      },
+      timeEn: {
         type: Sequelize.STRING
       },
       timeType: {
