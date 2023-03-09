@@ -70,21 +70,42 @@ let getAllDoctors = () => {
 }
 
 function checkData(data) {
-    if(Object.keys(data).length === 0) return false;
-    for (let i = 0; i < Object.keys(data).length; i++) {
-        if(Object.keys(data)[i] === 'note') continue;
-        if(!Object.values(data)[i]) return false;
+    let isValid = true;
+    let element = '';
+    let arrLength = Object.keys(data).length;
+    if(arrLength === 0) {
+        return {
+            isValid: false,
+            element: ''
+        };
     }
-    return true;
+    else {
+        for (let i = 0; i < arrLength; i++) {
+            let x = Object.keys(data)[i];
+            let y = Object.values(data)[i];
+            if(x === 'note' || x === 'clinicId') continue;
+            else {
+                if(!y) {
+                    isValid = false;
+                    element = x;
+                    break;
+                }
+            }
+        }
+    }
+    return {
+        isValid,
+        element
+    }
 }
 
 let createInfoDoctor = (data) => {
     return new Promise( async (resolve, reject) => {
         try {
-            if(!checkData(data)) {
+            if(checkData(data).isValid === false) {
                 resolve({
                      errCode: 1,
-                     errMessage: "Missing parameter..."
+                     errMessage: `Missing parameter ${checkData(data).element}...`
                 })
             }
             else {
@@ -123,10 +144,12 @@ let createInfoDoctor = (data) => {
                 if(doctorInfo) {
                     await db.Doctor_Info.update(
                         {
+                            doctorId: data.doctorId,
+                            specialtyId: data.specialtyId,
+                            clinicId: data.clinicId,
                             priceId: data.selectedPrice,
                             paymentId: data.selectedPayment,
                             provinceId: data.selectedProvince,
-                            doctorId: data.doctorId,
                             nameClinic: data.nameClinic,
                             addressClinic: data.addressClinic,
                             note: data.note
@@ -137,6 +160,8 @@ let createInfoDoctor = (data) => {
                 }
                 else {
                     await db.Doctor_Info.create({
+                        specialtyId: data.specialtyId,
+                        clinicId: data.clinicId,
                         priceId: data.selectedPrice,
                         paymentId: data.selectedPayment,
                         provinceId: data.selectedProvince,
