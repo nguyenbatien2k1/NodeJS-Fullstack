@@ -24,14 +24,14 @@ module.exports = {
       phonenumber: {
         type: Sequelize.STRING
       },
-      timeVi: {
-        type: Sequelize.STRING
-      },
-      timeEn: {
+      date: {
         type: Sequelize.STRING
       },
       timeType: {
         type: Sequelize.STRING
+      },
+      reason: {
+        type: Sequelize.TEXT('long')
       },
       token: {
         type: Sequelize.STRING

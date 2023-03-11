@@ -5,14 +5,33 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 function checkData(data) {
-    if(!Object.keys(data).length) return false;
+    let isValid = true;
+    let element = '';
+    let arrLength = Object.keys(data).length;
+    if(arrLength === 0) {
+        return {
+            isValid: false,
+            element: ''
+        };
+    }
     else {
-        for (let i = 0; i < Object.keys(data).length; i++) {
-            if(Object.keys(data)[i] === 'note') continue;
-            if(!Object.values(data)[i]) return false;
+        for (let i = 0; i < arrLength; i++) {
+            let x = Object.keys(data)[i];
+            let y = Object.values(data)[i];
+            if(x === 'note') continue;
+            else {
+                if(!y) {
+                    isValid = false;
+                    element = x;
+                    break;
+                }
+            }
         }
     }
-    return true;
+    return {
+        isValid,
+        element
+    }
 }
 
 
@@ -28,7 +47,7 @@ let postBookAppointment = (data) => {
             if(!checkData(data)) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Missing parameter...'
+                    errMessage: `Missing ${checkData(data).element}...`
                 })
             }
             else {
@@ -40,8 +59,7 @@ let postBookAppointment = (data) => {
                     receiverEmail: data.email,
                     phonenumber: data.phonenumber,
                     address: data.address,
-                    timeVi: data.timeVi,
-                    timeEn: data.timeEn,
+                    time: data.time,
                     reason: data.reason,
                     price: data.price,
                     doctorName: data.doctorName,
@@ -60,13 +78,11 @@ let postBookAppointment = (data) => {
                     }
                 })
 
+                console.log(user[0].id)
+
                 if(user && user[0]) {
                     let checkUser = await db.Booking.findOne({
-                        where: {doctorId: data.doctorId, timeType: data.timeType, 
-                            [Op.or]: [
-                                { timeVi: data.timeVi },
-                                { timeEn: data.timeEn }
-                          ]}
+                        where: {doctorId: data.doctorId, timeType: data.timeType, date: data.date}
                     })
                     if(checkUser) {
                         await db.Booking.update({
@@ -75,9 +91,9 @@ let postBookAppointment = (data) => {
                             patientId: user[0].id,
                             fullname: data.fullname,
                             phonenumber: data.phonenumber,
-                            timeVi: data.timeVi,
-                            timeEn: data.timeEn,
+                            date: data.date,
                             timeType: data.timeType,
+                            reason: data.reason,
                             token: token
                         }, {where: {patientId: user[0].id}});
 
@@ -93,9 +109,9 @@ let postBookAppointment = (data) => {
                             patientId: user[0].id,
                             fullname: data.fullname,
                             phonenumber: data.phonenumber,
-                            timeVi: data.timeVi,
-                            timeEn: data.timeEn,
+                            date: data.date,
                             timeType: data.timeType,
+                            reason: data.reason,
                             token: token
                         })
 
