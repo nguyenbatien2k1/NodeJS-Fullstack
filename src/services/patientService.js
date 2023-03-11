@@ -78,11 +78,16 @@ let postBookAppointment = (data) => {
                     }
                 })
 
-                console.log(user[0].id)
-
                 if(user && user[0]) {
                     let checkUser = await db.Booking.findOne({
-                        where: {doctorId: data.doctorId, timeType: data.timeType, date: data.date}
+                        where: {
+                            doctorId: data.doctorId, 
+                            timeType: data.timeType, 
+                            date: data.date, 
+                            patientId: user[0].id,
+                            statusId: 'S1',
+                        }
+
                     })
                     if(checkUser) {
                         await db.Booking.update({
@@ -95,7 +100,7 @@ let postBookAppointment = (data) => {
                             timeType: data.timeType,
                             reason: data.reason,
                             token: token
-                        }, {where: {patientId: user[0].id}});
+                        }, {where: {doctorId: data.doctorId, timeType: data.timeType, date: data.date, patientId: user[0].id}, statusId: 'S1'});
 
                         resolve({
                             errCode: 0,
