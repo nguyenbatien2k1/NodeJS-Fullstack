@@ -15,7 +15,7 @@ let createNewClinic = async (req, res) => {
 
 let getAllClinic = async (req, res) => {
     try {
-        let data = await ClinicService.getAllClinic();
+        let data = await clinicService.getAllClinic();
         return res.status(200).json(data);
     } catch (error) {
         console.log(error);
@@ -28,7 +28,7 @@ let getAllClinic = async (req, res) => {
 
 let getDetailClinicById = async (req, res) => {
     try {
-        let data = await ClinicService.getDetailClinicById(req.query.ClinicId, req.query.location);
+        let data = await clinicService.getDetailClinicById(req.query.clinicId);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error);
