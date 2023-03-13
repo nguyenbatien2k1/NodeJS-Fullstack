@@ -1,6 +1,7 @@
 import db from "../models";
 require('dotenv').config();
 import _, { reject } from 'lodash';
+import emailService from "./emailService";
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
@@ -415,7 +416,7 @@ let getListPatient = (doctorId, date) => {
                 let listPatient = await db.Booking.findAll({
                     where: {statusId: 'S2', doctorId: doctorId, date: date},
                     include: [
-                        {model: db.User, as: 'patientData', attributes: ['address', 'gender'],
+                        {model: db.User, as: 'patientData', attributes: ['email','address', 'gender'],
                             include: [
                                 {model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi']}
                             ]
@@ -439,6 +440,44 @@ let getListPatient = (doctorId, date) => {
     })
 }
 
+let sendRemedy = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if(!data.doctorId || !data.patientId || !data.email || !data.timeType || !data.date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing parameter...'
+                })
+            }
+            else {
+                let appointment = await db.Booking.findOne({
+                    where: {
+                        doctorId: data.doctorId,
+                        patientId: data.patientId,
+                        timeType: data.timeType,
+                        statusId: 'S2',
+                        date: data.date
+                    },
+                    raw: false
+                })
+                if(appointment) {
+                    appointment.statusId = 'S3';
+                    appointment.save();
+                }
+
+                await emailService.sendAttachment(data);
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Update Appointment OK',
+                    data: data
+                })
+            }
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 export default {
     getOutStandingDoctor,
     getAllDoctors,
@@ -448,5 +487,6 @@ export default {
     getScheduleDoctorByDate,
     getMedicalAddressDoctorById,
     getProfileDoctorById,
-    getListPatient
+    getListPatient,
+    sendRemedy
 };

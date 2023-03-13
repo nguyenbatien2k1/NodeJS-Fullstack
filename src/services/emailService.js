@@ -45,7 +45,7 @@ let bodyMail = (dataSend) => {
     `
   }
   else if(dataSend.language === 'en') {
-    result = `<h3>Hello, {dataSend.fullname} ! </h3>
+    result = `<h3>Hello, ${dataSend.fullname} ! </h3>
      <p>You received this message because you booked an online appointment with Tien Basic</p>
      <p>Medical appointment booking information: </p>
     <div>First and last name: ${dataSend.fullname}</div>
@@ -60,6 +60,55 @@ let bodyMail = (dataSend) => {
   return result;
 }
 
+let sendAttachment = async (dataSend) => {
+
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.EMAIL_APP_ACCOUNT, // generated ethereal user
+        pass: process.env.EMAIL_APP_PASSWORD, // generated ethereal password
+      },
+    });
+  
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+      from: '"Tien._.Basic 👻" <19020456@vnu.edu.vn>', // sender address
+      to: dataSend.email, // list of receivers
+      subject: dataSend.language === 'vi' ? "Kết quả đặt lịch khám bệnh" : "Result a medical appointment", // Subject line
+      html: getBodyMailRemedy(dataSend), // html body
+      attachments: [
+        {   // encoded string as an attachment
+          filename: `remedy-${dataSend.patientId}-${dataSend.fullname}.${dataSend.tailFile}`,
+          content: dataSend.imgBase64.split('base64,')[1],
+          encoding: 'base64'
+      },
+      ]
+    });
+}
+
+let getBodyMailRemedy = (dataSend) => {
+  let result = '';
+  if(dataSend.language === 'vi') {
+    result = `<h3>Xin chào, ${dataSend.fullname} ! </h3>
+    <p>Bạn nhận được thông báo này vì đã đặt lịch khám bệnh online của Pharmacity</p>
+    <p>Thông tin hóa đơn thuốc được gửi trong file đính kèm. </p>
+    <div>Xin chân thành cảm ơn!<div>
+    `
+  }
+  else if(dataSend.language === 'en') {
+    result = `<h3>Hello, ${dataSend.fullname} ! </h3>
+     <p>You received this message because you booked an online appointment with Tien Basic</p>
+     <p>Medical appointment booking information: </p>
+      <div>Thank you very much!<div>
+     `
+  }
+  return result;
+}
+
 export default {
     sendSimpleEmail,
+    sendAttachment
 }
